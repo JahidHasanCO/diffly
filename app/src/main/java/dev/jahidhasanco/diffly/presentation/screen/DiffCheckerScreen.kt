@@ -3,6 +3,7 @@ package dev.jahidhasanco.diffly.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,9 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,8 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.jahidhasanco.diffly.domain.model.DiffViewType
 import dev.jahidhasanco.diffly.presentation.MainViewModel
-import dev.jahidhasanco.diffly.presentation.component.CharDiffText
+import dev.jahidhasanco.diffly.presentation.component.ColumCharDiffText
+import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
+import dev.jahidhasanco.diffly.presentation.component.UnifiedCharDiffText
 import dev.jahidhasanco.diffly.presentation.theme.background
 import dev.jahidhasanco.diffly.presentation.theme.primary
 
@@ -53,10 +60,11 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
     var newText by remember { mutableStateOf("") }
     val diffResult by viewModel.diffResult.collectAsState()
     var realTimeDiff by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    var selectedViewType by remember { mutableStateOf(DiffViewType.TWO_SIDE) }
     val scrollState = rememberScrollState()
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         containerColor = background,
         topBar = {
             TopAppBar(
@@ -68,20 +76,42 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                         ),
                         color = primary,
                     )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = primary
-                ),
-                actions = {
-                    Text(
-                        text = "v1.0",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                }
-            )
+                }, colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White, titleContentColor = primary
+                ), actions = {
+                    // Popup Menu Icon
+                    Box {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = "Menu"
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Two Side View") },
+                                onClick = {
+                                    selectedViewType = DiffViewType.TWO_SIDE
+                                    expanded = false
+                                })
+                            DropdownMenuItem(
+                                text = { Text("Column View") },
+                                onClick = {
+                                    selectedViewType = DiffViewType.SEPARATE
+                                    expanded = false
+                                })
+                            DropdownMenuItem(
+                                text = { Text("Unified View") },
+                                onClick = {
+                                    selectedViewType = DiffViewType.UNIFIED
+                                    expanded = false
+                                })
+                        }
+                    }
+                })
         }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -103,9 +133,12 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                     modifier = Modifier.padding(end = 20.dp)
                 )
                 Switch(
-                    checked = realTimeDiff,
-                    onCheckedChange = { realTimeDiff = it },
-                    colors = SwitchDefaults.colors(
+                    checked = realTimeDiff, onCheckedChange = {
+                        realTimeDiff = it
+                        if (it) {
+                            viewModel.calculateDiff(oldText, newText)
+                        }
+                    }, colors = SwitchDefaults.colors(
                         checkedThumbColor = primary,
                         uncheckedThumbColor = Color.Gray,
                         checkedTrackColor = primary.copy(alpha = 0.3f),
@@ -165,8 +198,7 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                     }
                 },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = primary
+                    containerColor = Color.Transparent, contentColor = primary
                 ),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -174,7 +206,8 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
             ) {
                 Icon(
                     imageVector = Icons.Default.SwapVert,
-                    contentDescription = "Swap", tint = primary,
+                    contentDescription = "Swap",
+                    tint = primary,
                     modifier = Modifier
                         .padding(2.dp)
                         .size(28.dp)
@@ -234,7 +267,11 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
             ) {
                 Text("Find Difference")
             }
-            CharDiffText(diffResult)
+            when (selectedViewType) {
+                DiffViewType.TWO_SIDE -> TwoSideCharDiffText(diffResult)
+                DiffViewType.SEPARATE -> ColumCharDiffText(diffResult)
+                DiffViewType.UNIFIED -> UnifiedCharDiffText(diffResult)
+            }
         }
     }
 }

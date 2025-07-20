@@ -25,7 +25,7 @@ import dev.jahidhasanco.diffly.presentation.theme.added
 import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
-fun CharDiffText(diffResult: List<DiffEntry>) {
+fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
     Row(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
