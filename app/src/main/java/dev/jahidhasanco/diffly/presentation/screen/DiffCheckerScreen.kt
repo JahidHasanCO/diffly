@@ -10,10 +10,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -32,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.jahidhasanco.diffly.presentation.MainViewModel
 import dev.jahidhasanco.diffly.presentation.component.CharDiffText
@@ -45,7 +53,7 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
     var newText by remember { mutableStateOf("") }
     val diffResult by viewModel.diffResult.collectAsState()
     var realTimeDiff by remember { mutableStateOf(false) }
-
+    val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -53,13 +61,26 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Diffly")
+                    Text(
+                        "Diffly",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = primary,
+                    )
                 },
-
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White,
                     titleContentColor = primary
                 ),
+                actions = {
+                    Text(
+                        text = "v1.0",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
             )
         }) { innerPadding ->
         Column(
@@ -71,13 +92,15 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth()
             ) {
                 Text(
                     text = "Real-time Diff",
                     style = MaterialTheme.typography.titleMedium,
                     color = if (realTimeDiff) primary else Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 20.dp)
                 )
                 Switch(
                     checked = realTimeDiff,
@@ -128,7 +151,36 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                 singleLine = false
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // swap icon button
+            IconButton(
+                onClick = {
+                    val temp = oldText
+                    oldText = newText
+                    newText = temp
+                    if (realTimeDiff) {
+                        viewModel.calculateDiff(oldText, newText)
+                    }
+                },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = primary
+                ),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SwapVert,
+                    contentDescription = "Swap", tint = primary,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .size(28.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = newText, onValueChange = {
                     newText = it
@@ -182,9 +234,6 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
             ) {
                 Text("Find Difference")
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             CharDiffText(diffResult)
         }
     }

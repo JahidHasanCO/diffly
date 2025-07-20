@@ -15,7 +15,6 @@ import dev.jahidhasanco.diffly.presentation.theme.delete
 fun InlineCharDiffText(charDiffs: List<CharDiff>) {
     val annotatedString = buildAnnotatedString {
         charDiffs.forEach { cd ->
-
             val backgroundColor = when (cd.type) {
                 CharDiffType.UNCHANGED -> Color.Unspecified
                 CharDiffType.INSERTED -> added

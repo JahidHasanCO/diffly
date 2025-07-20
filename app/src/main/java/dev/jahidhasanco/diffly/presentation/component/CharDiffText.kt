@@ -33,11 +33,24 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
                 .fillMaxHeight()
         ) {
             item {
-                Text(
-                    "Original Text",
-                    modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row {
+                    Text(
+                        "Original Text",
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    val count =
+                        diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.DELETED }
+                    if (count > 0)
+                        Text(
+                            "-${count}",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = delete,
+                                fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                            )
+                        )
+                }
             }
             items(diffResult) { entry ->
                 entry.oldLine?.let { line ->
@@ -57,7 +70,7 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(4.dp)
+                            .padding(horizontal = 2.dp, vertical = 1.dp)
                             .background(color = color)
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
@@ -79,11 +92,24 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
                 .fillMaxHeight()
         ) {
             item {
-                Text(
-                    "Changed Text",
-                    modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row {
+                    Text(
+                        "Changed Text",
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    val count =
+                        diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.ADDED }
+                    if (count > 0)
+                        Text(
+                            "+${count}",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = added,
+                                fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                            )
+                        )
+                }
             }
             items(diffResult) { entry ->
                 entry.newLine?.let { line ->
@@ -103,7 +129,7 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(4.dp)
+                            .padding(horizontal = 2.dp, vertical = 1.dp)
                             .background(color)
 
                     ) {
