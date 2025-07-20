@@ -1,7 +1,6 @@
 package dev.jahidhasanco.diffly.presentation.screen
 
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,8 +84,7 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .wrapContentWidth()
+                        modifier = Modifier.wrapContentWidth()
                     ) {
                         Text(
                             text = "Live",
@@ -95,13 +93,17 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                             modifier = Modifier.padding(end = 6.dp)
                         )
                         Switch(
-                            modifier = Modifier.padding(end = 4.dp).scale(0.7f),
-                            checked = realTimeDiff, onCheckedChange = {
+                            modifier = Modifier
+                                .padding(end = 4.dp)
+                                .scale(0.7f),
+                            checked = realTimeDiff,
+                            onCheckedChange = {
                                 realTimeDiff = it
                                 if (it) {
                                     viewModel.calculateDiff(oldText, newText)
                                 }
-                            }, colors = SwitchDefaults.colors(
+                            },
+                            colors = SwitchDefaults.colors(
                                 checkedThumbColor = primary,
                                 uncheckedThumbColor = Color.Gray,
                                 checkedTrackColor = primary.copy(alpha = 0.3f),
@@ -165,17 +167,14 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp)
-                    .background(
-                        color = Color.White, shape = RoundedCornerShape(8.dp)
-                    ),
+                    .height(150.dp),
 
                 shape = RoundedCornerShape(8.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = primary,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.White,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
                     focusedLabelColor = primary,
                     unfocusedLabelColor = Color.Gray,
                     focusedTextColor = Color.Black,
@@ -224,10 +223,7 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                     }
                 }, modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp)
-                    .background(
-                        color = Color.White, shape = RoundedCornerShape(8.dp)
-                    ),
+                    .height(150.dp),
 
                 shape = RoundedCornerShape(8.dp), label = {
                     Text(
@@ -236,9 +232,9 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                     )
                 }, colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = primary,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.White,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
                     focusedLabelColor = primary,
                     unfocusedLabelColor = Color.Gray,
                     focusedTextColor = Color.Black,
