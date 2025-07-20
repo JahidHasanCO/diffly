@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,12 +26,8 @@ import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
 fun CharDiffText(diffResult: List<DiffEntry>) {
-    val scrollStateOld = rememberLazyListState()
-    val scrollStateNew = rememberLazyListState()
-
     Row(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            state = scrollStateOld,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
@@ -79,7 +74,6 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
 
         // New text column
         LazyColumn(
-            state = scrollStateNew,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()

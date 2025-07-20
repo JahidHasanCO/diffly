@@ -22,6 +22,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,11 +48,18 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .background(background),
+            .fillMaxSize(),
+        containerColor = background,
         topBar = {
             TopAppBar(
-                title = { Text("Diffly") },
+                title = {
+                    Text("Diffly")
+                },
+
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = primary
+                ),
             )
         }) { innerPadding ->
         Column(
