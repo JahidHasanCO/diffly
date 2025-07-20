@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -16,8 +20,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.jahidhasanco.diffly.di.AppModule
+import dev.jahidhasanco.diffly.domain.model.CharDiff
+import dev.jahidhasanco.diffly.domain.model.CharDiffType
 import dev.jahidhasanco.diffly.domain.model.DiffType
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +53,6 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
     ) {
         Text("Old Text")
         TextField(
@@ -53,7 +62,9 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                 .fillMaxWidth()
                 .height(150.dp)
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Text("New Text")
         TextField(
             value = newText,
@@ -62,7 +73,9 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                 .fillMaxWidth()
                 .height(150.dp)
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = { viewModel.calculateDiff(oldText, newText) },
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -72,47 +85,97 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Old Text")
-                diffResult.forEach { entry ->
-                    entry.oldLine?.let {
+        // Use Box with weight to give LazyColumns height
+        Box(modifier = Modifier.weight(1f)) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                val scrollStateOld = rememberLazyListState()
+                val scrollStateNew = rememberLazyListState()
+
+                // Old Text Column
+                LazyColumn(
+                    state = scrollStateOld,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .border(1.dp, Color.Gray)
+                ) {
+                    item {
                         Text(
-                            it,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    when (entry.type) {
-                                        DiffType.DELETED -> Color(0xFFFFC0C0)
-                                        else -> Color.Transparent
-                                    }
-                                )
-                                .padding(4.dp)
+                            "Old Text",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.titleMedium
                         )
                     }
+                    items(diffResult) { entry ->
+                        entry.oldLine?.let {
+                            val charDiffs = entry.charDiffs?.filter { it.type != CharDiffType.INSERTED }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp)
+                            ) {
+                                if (!charDiffs.isNullOrEmpty()) {
+                                    InlineCharDiffText(charDiffs = charDiffs)
+                                } else {
+                                    Text(it)
+                                }
+                            }
+                        }
+                    }
                 }
-            }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text("New Text")
-                diffResult.forEach { entry ->
-                    entry.newLine?.let {
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // New Text Column
+                LazyColumn(
+                    state = scrollStateNew,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .border(1.dp, Color.Gray)
+                ) {
+                    item {
                         Text(
-                            it,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    when (entry.type) {
-                                        DiffType.ADDED -> Color(0xFFD0F0C0)
-                                        else -> Color.Transparent
-                                    }
-                                )
-                                .padding(4.dp)
+                            "New Text",
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.titleMedium
                         )
+                    }
+                    items(diffResult) { entry ->
+                        entry.newLine?.let {
+                            val charDiffs = entry.charDiffs?.filter { it.type != CharDiffType.DELETED }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp)
+                            ) {
+                                if (!charDiffs.isNullOrEmpty()) {
+                                    InlineCharDiffText(charDiffs = charDiffs)
+                                } else {
+                                    Text(it)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-
     }
+}
+
+@Composable
+fun InlineCharDiffText(charDiffs: List<CharDiff>) {
+    val annotatedString = buildAnnotatedString {
+        charDiffs.forEach { cd ->
+            val color = when (cd.type) {
+                CharDiffType.UNCHANGED -> Color.Unspecified
+                CharDiffType.INSERTED -> Color(0xFF00C281) // green
+                CharDiffType.DELETED -> Color(0xFFFF6B6B) // red
+            }
+            withStyle(SpanStyle(color = color)) {
+                append(cd.char)
+            }
+        }
+    }
+    Text(annotatedString)
 }

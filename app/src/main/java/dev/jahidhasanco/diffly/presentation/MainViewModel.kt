@@ -1,5 +1,6 @@
 package dev.jahidhasanco.diffly.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.jahidhasanco.diffly.domain.model.DiffEntry
@@ -18,6 +19,7 @@ class MainViewModel(
     fun calculateDiff(oldText: String, newText: String) {
         viewModelScope.launch {
             val result = calculateDiffUseCase(oldText, newText)
+            Log.d("DiffChecker", "Diff calculated: $result")
             _diffResult.value = result
         }
     }
