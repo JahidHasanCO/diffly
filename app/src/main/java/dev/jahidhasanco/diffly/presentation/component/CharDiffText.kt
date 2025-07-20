@@ -39,7 +39,7 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
         ) {
             item {
                 Text(
-                    "Old Text",
+                    "Original Text",
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -86,7 +86,7 @@ fun CharDiffText(diffResult: List<DiffEntry>) {
         ) {
             item {
                 Text(
-                    "New Text",
+                    "Changed Text",
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
