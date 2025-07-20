@@ -16,7 +16,9 @@ android {
         versionName = "1.0"
         splits {
             abi {
-                isEnable = project.findProperty("splitApk")?.toString()?.toBoolean() ?: false
+                isEnable =
+                    project.findProperty("splitApk")?.toString()
+                        ?.toBoolean() == true
             }
         }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -24,7 +26,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
