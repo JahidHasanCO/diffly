@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -80,6 +82,34 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                     containerColor = Color.White, titleContentColor = primary
                 ), actions = {
                     // Popup Menu Icon
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .wrapContentWidth()
+                    ) {
+                        Text(
+                            text = "Live",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (realTimeDiff) primary else Color.Gray,
+                            modifier = Modifier.padding(end = 6.dp)
+                        )
+                        Switch(
+                            modifier = Modifier.padding(end = 4.dp).scale(0.7f),
+                            checked = realTimeDiff, onCheckedChange = {
+                                realTimeDiff = it
+                                if (it) {
+                                    viewModel.calculateDiff(oldText, newText)
+                                }
+                            }, colors = SwitchDefaults.colors(
+                                checkedThumbColor = primary,
+                                uncheckedThumbColor = Color.Gray,
+                                checkedTrackColor = primary.copy(alpha = 0.3f),
+                                uncheckedTrackColor = Color.LightGray
+                            )
+                        )
+                    }
+
                     Box {
                         IconButton(onClick = { expanded = true }) {
                             Icon(
@@ -119,34 +149,6 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "Real-time Diff",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (realTimeDiff) primary else Color.Gray,
-                    modifier = Modifier.padding(end = 20.dp)
-                )
-                Switch(
-                    checked = realTimeDiff, onCheckedChange = {
-                        realTimeDiff = it
-                        if (it) {
-                            viewModel.calculateDiff(oldText, newText)
-                        }
-                    }, colors = SwitchDefaults.colors(
-                        checkedThumbColor = primary,
-                        uncheckedThumbColor = Color.Gray,
-                        checkedTrackColor = primary.copy(alpha = 0.3f),
-                        uncheckedTrackColor = Color.LightGray
-                    )
-                )
-            }
-
             OutlinedTextField(
                 value = oldText,
                 onValueChange = {
