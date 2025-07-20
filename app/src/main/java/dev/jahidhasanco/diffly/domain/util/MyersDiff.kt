@@ -8,7 +8,10 @@ class MyersDiff {
 
     private val charLevelDiff = CharLevelDiff()
 
-    fun calculateDiff(oldLines: List<String>, newLines: List<String>): List<DiffEntry> {
+    fun calculateDiff(
+        oldLines: List<String>,
+        newLines: List<String>
+    ): List<DiffEntry> {
         val n = oldLines.size
         val m = newLines.size
         val max = n + m
@@ -132,31 +135,19 @@ class MyersDiff {
         val merged = mutableListOf<DiffEntry>()
         var i = 0
         while (i < diffEntries.size) {
-            val current = diffEntries[i]
-
-            // Check if next entry is an inserted line
-            if (current.type == DiffType.DELETED && i + 1 < diffEntries.size) {
+            if (i < diffEntries.size - 1) {
+                val curr = diffEntries[i]
                 val next = diffEntries[i + 1]
-                if (next.type == DiffType.ADDED) {
-                    // Merge as changed line with char diff
-                    val oldLine = current.oldLine ?: ""
+                if (curr.type == DiffType.DELETED && next.type == DiffType.ADDED) {
+                    val oldLine = curr.oldLine ?: ""
                     val newLine = next.newLine ?: ""
-                    val charDiffs = CharLevelDiff().diff(oldLine, newLine)
-
-                    merged.add(
-                        DiffEntry(
-                            oldLine = oldLine,
-                            newLine = newLine,
-                            type = DiffType.CHANGED,
-                            charDiffs = charDiffs
-                        )
-                    )
+                    val charDiffs = charLevelDiff.diff(oldLine, newLine)
+                    merged.add(DiffEntry(oldLine, newLine, DiffType.CHANGED, charDiffs))
                     i += 2
                     continue
                 }
             }
-            // Otherwise add as-is
-            merged.add(current)
+            merged.add(diffEntries[i])
             i++
         }
         return merged
