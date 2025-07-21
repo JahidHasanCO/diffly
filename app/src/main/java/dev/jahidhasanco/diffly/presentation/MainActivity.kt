@@ -4,18 +4,22 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dev.jahidhasanco.diffly.di.AppModule
+import dev.jahidhasanco.diffly.navigation.NavControllerRouter
+import dev.jahidhasanco.diffly.navigation.Screen
 import dev.jahidhasanco.diffly.presentation.screen.DiffCheckerScreen
+import dev.jahidhasanco.diffly.presentation.screen.DiffViewerScreen
+import dev.jahidhasanco.diffly.presentation.viewmodel.DiffCheckerViewModel
 
 class MainActivity : ComponentActivity() {
-    private val viewModel by lazy {
-        MainViewModel(AppModule.calculateDiffUseCase)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -24,10 +28,33 @@ class MainActivity : ComponentActivity() {
                 SideEffect {
                     val window = (view.context as Activity).window
                     WindowCompat.setDecorFitsSystemWindows(window, true)
-                    WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = true
+                    WindowInsetsControllerCompat(
+                        window, view
+                    ).isAppearanceLightStatusBars = true
                 }
             }
+            AppNavHost()
+        }
+    }
+}
+
+@Composable
+fun AppNavHost() {
+    val navController = rememberNavController()
+    val router = NavControllerRouter(navController)
+
+    NavHost(
+        navController = navController,
+        startDestination = Screen.DiffChecker.route
+    ) {
+        composable(Screen.DiffChecker.route) {
+            val viewModel by lazy {
+                DiffCheckerViewModel(AppModule.calculateDiffUseCase, router)
+            }
             DiffCheckerScreen(viewModel)
+        }
+        composable(Screen.DiffViewer.route) {
+            DiffViewerScreen()
         }
     }
 }

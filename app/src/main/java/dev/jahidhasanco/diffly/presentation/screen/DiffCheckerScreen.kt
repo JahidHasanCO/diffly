@@ -49,16 +49,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
-import dev.jahidhasanco.diffly.presentation.MainViewModel
 import dev.jahidhasanco.diffly.presentation.component.ColumCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.UnifiedCharDiffText
 import dev.jahidhasanco.diffly.presentation.theme.background
 import dev.jahidhasanco.diffly.presentation.theme.primary
+import dev.jahidhasanco.diffly.presentation.viewmodel.DiffCheckerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiffCheckerScreen(viewModel: MainViewModel) {
+fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
     var oldText by remember { mutableStateOf("") }
     var newText by remember { mutableStateOf("") }
     val diffResult by viewModel.diffResult.collectAsState()
