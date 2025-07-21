@@ -1,5 +1,7 @@
 # Diffly
 
+![Logo](ART/Cover.png)
+
 Diffly is a text comparison tool built in Kotlin, inspired by the functionality and user experience of [Diffchecker Text Compare](https://www.diffchecker.com/text-compare/). This project provides an easy-to-use interface for comparing two pieces of text and visualizing their differences efficiently.
 
 ## Features
@@ -15,8 +17,8 @@ This project is inspired by [Diffchecker Text Compare](https://www.diffchecker.c
 
 ## Screenshots
 
-| Screenshot 1          | Screenshot 2         | ScreenSshot 3        |
-|-----------------------|----------------------|----------------------|
+| Screenshot 1          | Screenshot 2         | Screenshot 3        |
+|-----------------------|----------------------|---------------------|
 | ![Screenshot 1](ART/ART1-portrait.png) | ![Screenshot 2](ART/ART2-portrait.png) | ![Screenshot 3](ART/ART3-portrait.png) |
 
 
