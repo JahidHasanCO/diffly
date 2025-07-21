@@ -3,6 +3,7 @@ package dev.jahidhasanco.diffly.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.jahidhasanco.diffly.di.AppModule
 import dev.jahidhasanco.diffly.domain.model.DiffEntry
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
 import dev.jahidhasanco.diffly.domain.usecase.CalculateDiffUseCase
@@ -16,6 +17,8 @@ class DiffCheckerViewModel(
     private val router: NavigationRouter
 ) : ViewModel() {
 
+    private val prefs = AppModule.prefsManager
+
     private val _diffResult = MutableStateFlow<List<DiffEntry>>(emptyList())
     val diffResult: StateFlow<List<DiffEntry>> = _diffResult
 
@@ -25,13 +28,17 @@ class DiffCheckerViewModel(
     private val _newText = MutableStateFlow("")
     val newText: StateFlow<String> = _newText
 
-    private val _realTimeDiff = MutableStateFlow(false)
+    private val _realTimeDiff = MutableStateFlow(prefs.realTimeDiff)
     val realTimeDiff: StateFlow<Boolean> = _realTimeDiff
 
     private val _expanded = MutableStateFlow(false)
     val expanded: StateFlow<Boolean> = _expanded
 
-    private val _selectedViewType = MutableStateFlow(DiffViewType.TWO_SIDE)
+    private val _selectedViewType = MutableStateFlow(
+        DiffViewType.valueOf(
+            prefs.selectedViewType ?: DiffViewType.TWO_SIDE.name
+        )
+    )
     val selectedViewType: StateFlow<DiffViewType> = _selectedViewType
 
     fun updateOldText(value: String) {
@@ -46,6 +53,7 @@ class DiffCheckerViewModel(
 
     fun setRealTimeDiff(value: Boolean) {
         _realTimeDiff.value = value
+        prefs.realTimeDiff = value
         if (value) calculateDiff(_oldText.value, _newText.value)
     }
 
@@ -55,6 +63,7 @@ class DiffCheckerViewModel(
 
     fun selectViewType(type: DiffViewType) {
         _selectedViewType.value = type
+        prefs.selectedViewType = type.name
         _expanded.value = false
     }
 
