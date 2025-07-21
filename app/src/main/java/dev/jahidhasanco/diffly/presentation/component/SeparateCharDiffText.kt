@@ -3,6 +3,7 @@ package dev.jahidhasanco.diffly.presentation.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,25 +25,28 @@ import dev.jahidhasanco.diffly.presentation.theme.added
 import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
-fun ColumCharDiffText(diffResult: List<DiffEntry>) {
+fun SeparateCharDiffText(diffResult: List<DiffEntry>) {
     Column(modifier = Modifier.fillMaxSize()) {
 
         // Original Text Column
-        Text(
-            "Original Text",
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
-        val deletedCount = diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.DELETED }
-        if (deletedCount > 0) {
+        Row {
             Text(
-                "-$deletedCount",
-                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = delete,
-                    fontWeight = MaterialTheme.typography.titleMedium.fontWeight
-                )
+                "Original Text",
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.titleMedium
             )
+            val deletedCount =
+                diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.DELETED }
+            if (deletedCount > 0) {
+                Text(
+                    "-$deletedCount",
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = delete,
+                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                    )
+                )
+            }
         }
 
         LazyColumn(
@@ -56,7 +60,10 @@ fun ColumCharDiffText(diffResult: List<DiffEntry>) {
                         entry.charDiffs?.filter { it.type != CharDiffType.INSERTED }
                     }
                     val color = when (entry.type) {
-                        DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> delete.copy(alpha = 0.3f)
+                        DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> delete.copy(
+                            alpha = 0.3f
+                        )
+
                         else -> Color.Unspecified
                     }
 
@@ -76,25 +83,25 @@ fun ColumCharDiffText(diffResult: List<DiffEntry>) {
             }
         }
 
-        // Spacer between sections
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Changed Text Column
-        Text(
-            "Changed Text",
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
-        val addedCount = diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.ADDED }
-        if (addedCount > 0) {
+        Row {
             Text(
-                "+$addedCount",
-                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = added,
-                    fontWeight = MaterialTheme.typography.titleMedium.fontWeight
-                )
+                "Changed Text",
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.titleMedium
             )
+            val addedCount =
+                diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.ADDED }
+            if (addedCount > 0) {
+                Text(
+                    "+$addedCount",
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = added,
+                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                    )
+                )
+            }
         }
 
         LazyColumn(
@@ -108,7 +115,10 @@ fun ColumCharDiffText(diffResult: List<DiffEntry>) {
                         entry.charDiffs?.filter { it.type != CharDiffType.DELETED }
                     }
                     val color = when (entry.type) {
-                        DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> added.copy(alpha = 0.3f)
+                        DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> added.copy(
+                            alpha = 0.3f
+                        )
+
                         else -> Color.Unspecified
                     }
 

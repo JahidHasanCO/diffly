@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,9 +40,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -49,7 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
-import dev.jahidhasanco.diffly.presentation.component.ColumCharDiffText
+import dev.jahidhasanco.diffly.presentation.component.SeparateCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.UnifiedCharDiffText
 import dev.jahidhasanco.diffly.presentation.theme.background
@@ -59,14 +57,16 @@ import dev.jahidhasanco.diffly.presentation.viewmodel.DiffCheckerViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
-    var oldText by remember { mutableStateOf("") }
-    var newText by remember { mutableStateOf("") }
+    val oldText by viewModel.oldText.collectAsState()
+    val newText by viewModel.newText.collectAsState()
+    val realTimeDiff by viewModel.realTimeDiff.collectAsState()
+    val expanded by viewModel.expanded.collectAsState()
+    val selectedViewType by viewModel.selectedViewType.collectAsState()
     val diffResult by viewModel.diffResult.collectAsState()
-    var realTimeDiff by remember { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
-    var selectedViewType by remember { mutableStateOf(DiffViewType.TWO_SIDE) }
     Scaffold(
-        modifier = Modifier.fillMaxSize().imePadding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
         containerColor = background,
         topBar = {
             TopAppBar(
@@ -94,15 +94,9 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                             modifier = Modifier.padding(end = 2.dp)
                         )
                         Switch(
-                            modifier = Modifier
-                                .scale(0.7f),
+                            modifier = Modifier.scale(0.7f),
                             checked = realTimeDiff,
-                            onCheckedChange = {
-                                realTimeDiff = it
-                                if (it) {
-                                    viewModel.calculateDiff(oldText, newText)
-                                }
-                            },
+                            onCheckedChange = viewModel::setRealTimeDiff,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = primary,
                                 uncheckedThumbColor = Color.Gray,
@@ -113,7 +107,7 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                     }
 
                     Box {
-                        IconButton(onClick = { expanded = true }) {
+                        IconButton(onClick = { viewModel.setExpanded(!expanded) }) {
                             Icon(
                                 Icons.Default.MoreVert,
                                 contentDescription = "Menu"
@@ -122,7 +116,7 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
 
                         DropdownMenu(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false }) {
+                            onDismissRequest = { viewModel.setExpanded(false) }) {
                             DropdownMenuItem(
                                 text = { Text("Two Side View") },
                                 trailingIcon = when (selectedViewType) {
@@ -138,8 +132,9 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                                     else -> null
                                 },
                                 onClick = {
-                                    selectedViewType = DiffViewType.TWO_SIDE
-                                    expanded = false
+                                    viewModel.selectViewType(
+                                        DiffViewType.TWO_SIDE
+                                    )
                                 })
                             DropdownMenuItem(
                                 text = { Text("Separate View") },
@@ -156,8 +151,9 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                                     else -> null
                                 },
                                 onClick = {
-                                    selectedViewType = DiffViewType.SEPARATE
-                                    expanded = false
+                                    viewModel.selectViewType(
+                                        DiffViewType.SEPARATE
+                                    )
                                 })
                             DropdownMenuItem(
                                 text = { Text("Unified View") },
@@ -174,13 +170,32 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                                     else -> null
                                 },
                                 onClick = {
-                                    selectedViewType = DiffViewType.UNIFIED
-                                    expanded = false
+                                    viewModel.selectViewType(
+                                        DiffViewType.UNIFIED
+                                    )
                                 })
                         }
                     }
                 })
-        }) { innerPadding ->
+        }, floatingActionButton = {
+            if (diffResult.isNotEmpty()) {
+                IconButton(
+                    onClick = viewModel::navigateToDiffViewer,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = primary,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.OpenInFull,
+                        contentDescription = "Expand",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -189,12 +204,7 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
         ) {
             OutlinedTextField(
                 value = oldText,
-                onValueChange = {
-                    oldText = it
-                    if (realTimeDiff) {
-                        viewModel.calculateDiff(oldText, newText)
-                    }
-                },
+                onValueChange = viewModel::updateOldText,
                 label = {
                     Text(
                         "Original Text",
@@ -221,24 +231,13 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                 singleLine = false
             )
 
-
             Spacer(modifier = Modifier.height(4.dp))
-
-            // swap icon button
             IconButton(
-                onClick = {
-                    val temp = oldText
-                    oldText = newText
-                    newText = temp
-                    if (realTimeDiff) {
-                        viewModel.calculateDiff(oldText, newText)
-                    }
-                },
+                onClick = viewModel::swapTexts,
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent, contentColor = primary
                 ),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Icon(
                     imageVector = Icons.Default.SwapVert,
@@ -251,21 +250,20 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
             }
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
-                value = newText, onValueChange = {
-                    newText = it
-                    if (realTimeDiff) {
-                        viewModel.calculateDiff(oldText, newText)
-                    }
-                }, modifier = Modifier
+                value = newText,
+                onValueChange = viewModel::updateNewText,
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
 
-                shape = RoundedCornerShape(8.dp), label = {
+                shape = RoundedCornerShape(8.dp),
+                label = {
                     Text(
                         "Changed Text",
                         style = MaterialTheme.typography.titleSmall
                     )
-                }, colors = TextFieldDefaults.colors(
+                },
+                colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = primary,
                     unfocusedIndicatorColor = Color.White,
                     focusedContainerColor = Color.White,
@@ -276,7 +274,8 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                     unfocusedTextColor = Color.Black
                 ),
 
-                maxLines = Int.MAX_VALUE, singleLine = false
+                maxLines = Int.MAX_VALUE,
+                singleLine = false
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -301,17 +300,16 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                 Text("Find Difference")
             }
 
-            Box (
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(8.dp)
                     .background(Color.White, RoundedCornerShape(8.dp))
-            )
-            {
+            ) {
                 when (selectedViewType) {
                     DiffViewType.TWO_SIDE -> TwoSideCharDiffText(diffResult)
-                    DiffViewType.SEPARATE -> ColumCharDiffText(diffResult)
+                    DiffViewType.SEPARATE -> SeparateCharDiffText(diffResult)
                     DiffViewType.UNIFIED -> UnifiedCharDiffText(diffResult)
                 }
             }

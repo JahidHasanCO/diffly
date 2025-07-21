@@ -42,19 +42,19 @@ class MainActivity : ComponentActivity() {
 fun AppNavHost() {
     val navController = rememberNavController()
     val router = NavControllerRouter(navController)
-
+    val diffCheckerViewModel by lazy {
+        DiffCheckerViewModel(AppModule.calculateDiffUseCase, router)
+    }
     NavHost(
         navController = navController,
         startDestination = Screen.DiffChecker.route
     ) {
         composable(Screen.DiffChecker.route) {
-            val viewModel by lazy {
-                DiffCheckerViewModel(AppModule.calculateDiffUseCase, router)
-            }
-            DiffCheckerScreen(viewModel)
+
+            DiffCheckerScreen(diffCheckerViewModel)
         }
         composable(Screen.DiffViewer.route) {
-            DiffViewerScreen()
+            DiffViewerScreen(diffCheckerViewModel)
         }
     }
 }

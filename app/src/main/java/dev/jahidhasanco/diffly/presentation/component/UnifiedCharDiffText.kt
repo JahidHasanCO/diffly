@@ -31,7 +31,7 @@ fun UnifiedCharDiffText(diffResult: List<DiffEntry>) {
     ) {
         item {
             Text(
-                "Unified Diff",
+                "Unified View",
                 modifier = Modifier.padding(8.dp),
                 style = MaterialTheme.typography.titleMedium
             )
