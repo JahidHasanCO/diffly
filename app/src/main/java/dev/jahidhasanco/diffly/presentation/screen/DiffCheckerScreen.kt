@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -65,7 +66,7 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
     var expanded by remember { mutableStateOf(false) }
     var selectedViewType by remember { mutableStateOf(DiffViewType.TWO_SIDE) }
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding(),
         containerColor = background,
         topBar = {
             TopAppBar(
