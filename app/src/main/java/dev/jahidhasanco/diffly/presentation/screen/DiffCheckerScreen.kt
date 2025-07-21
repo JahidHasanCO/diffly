@@ -1,6 +1,7 @@
 package dev.jahidhasanco.diffly.presentation.screen
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Button
@@ -63,7 +64,6 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
     var realTimeDiff by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var selectedViewType by remember { mutableStateOf(DiffViewType.TWO_SIDE) }
-    val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = background,
@@ -90,11 +90,10 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                             text = "Live",
                             style = MaterialTheme.typography.titleMedium,
                             color = if (realTimeDiff) primary else Color.Gray,
-                            modifier = Modifier.padding(end = 6.dp)
+                            modifier = Modifier.padding(end = 2.dp)
                         )
                         Switch(
                             modifier = Modifier
-                                .padding(end = 4.dp)
                                 .scale(0.7f),
                             checked = realTimeDiff,
                             onCheckedChange = {
@@ -125,18 +124,54 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                             onDismissRequest = { expanded = false }) {
                             DropdownMenuItem(
                                 text = { Text("Two Side View") },
+                                trailingIcon = when (selectedViewType) {
+                                    DiffViewType.TWO_SIDE -> {
+                                        {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+
+                                    else -> null
+                                },
                                 onClick = {
                                     selectedViewType = DiffViewType.TWO_SIDE
                                     expanded = false
                                 })
                             DropdownMenuItem(
-                                text = { Text("Column View") },
+                                text = { Text("Separate View") },
+                                trailingIcon = when (selectedViewType) {
+                                    DiffViewType.SEPARATE -> {
+                                        {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+
+                                    else -> null
+                                },
                                 onClick = {
                                     selectedViewType = DiffViewType.SEPARATE
                                     expanded = false
                                 })
                             DropdownMenuItem(
                                 text = { Text("Unified View") },
+                                trailingIcon = when (selectedViewType) {
+                                    DiffViewType.UNIFIED -> {
+                                        {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+
+                                    else -> null
+                                },
                                 onClick = {
                                     selectedViewType = DiffViewType.UNIFIED
                                     expanded = false
@@ -148,7 +183,7 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(10.dp)
                 .fillMaxSize()
         ) {
             OutlinedTextField(
@@ -203,7 +238,6 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
                 ),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.SwapVert,
@@ -265,11 +299,22 @@ fun DiffCheckerScreen(viewModel: MainViewModel) {
             ) {
                 Text("Find Difference")
             }
-            when (selectedViewType) {
-                DiffViewType.TWO_SIDE -> TwoSideCharDiffText(diffResult)
-                DiffViewType.SEPARATE -> ColumCharDiffText(diffResult)
-                DiffViewType.UNIFIED -> UnifiedCharDiffText(diffResult)
+
+            Box (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(8.dp)
+                    .background(Color.White, RoundedCornerShape(8.dp))
+            )
+            {
+                when (selectedViewType) {
+                    DiffViewType.TWO_SIDE -> TwoSideCharDiffText(diffResult)
+                    DiffViewType.SEPARATE -> ColumCharDiffText(diffResult)
+                    DiffViewType.UNIFIED -> UnifiedCharDiffText(diffResult)
+                }
             }
+
         }
     }
 }
