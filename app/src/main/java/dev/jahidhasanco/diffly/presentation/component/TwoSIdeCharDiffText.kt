@@ -18,6 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.wakaztahir.codeeditor.highlight.model.CodeLang
+import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
+import com.wakaztahir.codeeditor.highlight.theme.CodeTheme
+import com.wakaztahir.codeeditor.highlight.utils.parseCodeAsAnnotatedString
 import dev.jahidhasanco.diffly.domain.model.CharDiffType
 import dev.jahidhasanco.diffly.domain.model.DiffEntry
 import dev.jahidhasanco.diffly.domain.model.DiffType
@@ -25,7 +29,12 @@ import dev.jahidhasanco.diffly.presentation.theme.added
 import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
-fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
+fun TwoSideCharDiffText(
+    language: CodeLang,
+    parser: PrettifyParser,
+    theme: CodeTheme,
+    diffResult: List<DiffEntry>
+) {
     Row(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
@@ -41,15 +50,14 @@ fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
                     )
                     val count =
                         diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.DELETED }
-                    if (count > 0)
-                        Text(
-                            "-${count}",
-                            modifier = Modifier.padding(8.dp),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = delete,
-                                fontWeight = MaterialTheme.typography.titleMedium.fontWeight
-                            )
+                    if (count > 0) Text(
+                        "-${count}",
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = delete,
+                            fontWeight = MaterialTheme.typography.titleMedium.fontWeight
                         )
+                    )
                 }
             }
             items(diffResult) { entry ->
@@ -57,13 +65,12 @@ fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
                     val charDiffs = remember(entry.charDiffs) {
                         entry.charDiffs?.filter { it.type != CharDiffType.INSERTED }
                     }
-                    val color = entry.type
-                        .takeIf { it != DiffType.UNCHANGED }
-                        ?.let {
+                    val color =
+                        entry.type.takeIf { it != DiffType.UNCHANGED }?.let {
                             when (it) {
-                                DiffType.ADDED -> delete.copy(alpha = 0.3f)
-                                DiffType.DELETED -> delete.copy(alpha = 0.3f)
-                                DiffType.CHANGED -> delete.copy(alpha = 0.3f)
+                                DiffType.ADDED -> delete.copy(alpha = 0.05f)
+                                DiffType.DELETED -> delete.copy(alpha = 0.05f)
+                                DiffType.CHANGED -> delete.copy(alpha = 0.05f)
                                 else -> Color.Unspecified
                             }
                         } ?: Color.Unspecified
@@ -74,9 +81,24 @@ fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
                             .background(color = color)
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
-                            InlineCharDiffText(charDiffs = charDiffs)
+                            InlineCharDiffText(
+                                line,
+                                charDiffs = charDiffs,
+                                language,
+                                parser,
+                                theme
+                            )
                         } else {
-                            Text(line)
+                            val syntaxAnnotatedString =
+                                remember(line, language, theme) {
+                                    parseCodeAsAnnotatedString(
+                                        parser,
+                                        theme,
+                                        language,
+                                        line
+                                    )
+                                }
+                            Text(syntaxAnnotatedString)
                         }
                     }
                 }
@@ -100,15 +122,14 @@ fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
                     )
                     val count =
                         diffResult.count { it.type == DiffType.CHANGED || it.type == DiffType.ADDED }
-                    if (count > 0)
-                        Text(
-                            "+${count}",
-                            modifier = Modifier.padding(8.dp),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = added,
-                                fontWeight = MaterialTheme.typography.titleMedium.fontWeight
-                            )
+                    if (count > 0) Text(
+                        "+${count}",
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = added,
+                            fontWeight = MaterialTheme.typography.titleMedium.fontWeight
                         )
+                    )
                 }
             }
             items(diffResult) { entry ->
@@ -116,13 +137,12 @@ fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
                     val charDiffs = remember(entry.charDiffs) {
                         entry.charDiffs?.filter { it.type != CharDiffType.DELETED }
                     }
-                    val color = entry.type
-                        .takeIf { it != DiffType.UNCHANGED }
-                        ?.let {
+                    val color =
+                        entry.type.takeIf { it != DiffType.UNCHANGED }?.let {
                             when (it) {
-                                DiffType.ADDED -> added.copy(alpha = 0.3f)
-                                DiffType.DELETED -> added.copy(alpha = 0.3f)
-                                DiffType.CHANGED -> added.copy(alpha = 0.3f)
+                                DiffType.ADDED -> added.copy(alpha = 0.05f)
+                                DiffType.DELETED -> added.copy(alpha = 0.05f)
+                                DiffType.CHANGED -> added.copy(alpha = 0.05f)
                                 else -> Color.Unspecified
                             }
                         } ?: Color.Unspecified
@@ -134,9 +154,24 @@ fun TwoSideCharDiffText(diffResult: List<DiffEntry>) {
 
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
-                            InlineCharDiffText(charDiffs = charDiffs)
+                            InlineCharDiffText(
+                                line,
+                                charDiffs = charDiffs,
+                                language,
+                                parser,
+                                theme
+                            )
                         } else {
-                            Text(line)
+                            val syntaxAnnotatedString =
+                                remember(line, language, theme) {
+                                    parseCodeAsAnnotatedString(
+                                        parser,
+                                        theme,
+                                        language,
+                                        line
+                                    )
+                                }
+                            Text(syntaxAnnotatedString)
                         }
                     }
                 }

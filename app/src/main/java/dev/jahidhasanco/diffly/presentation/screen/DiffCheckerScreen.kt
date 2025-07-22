@@ -45,8 +45,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
+import com.wakaztahir.codeeditor.highlight.utils.parseCodeAsAnnotatedString
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
+import dev.jahidhasanco.diffly.presentation.component.LanguageDropdown
 import dev.jahidhasanco.diffly.presentation.component.SeparateCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.UnifiedCharDiffText
@@ -63,6 +69,10 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
     val expanded by viewModel.expanded.collectAsState()
     val selectedViewType by viewModel.selectedViewType.collectAsState()
     val diffResult by viewModel.diffResult.collectAsState()
+    val language = viewModel.selectedLanguage.collectAsState()
+    val parser = PrettifyParser()
+    val theme = viewModel.theme
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +91,10 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                 }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White, titleContentColor = primary
                 ), actions = {
-                    // Popup Menu Icon
+                    LanguageDropdown(
+                        selectedLanguage = language.value,
+                        onLanguageSelected = viewModel::selectLanguage
+                    )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
@@ -177,13 +190,13 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                         }
                     }
                 })
-        }, floatingActionButton = {
+        },
+        floatingActionButton = {
             if (diffResult.isNotEmpty()) {
                 IconButton(
                     onClick = viewModel::navigateToDiffViewer,
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = primary,
-                        contentColor = Color.White
+                        containerColor = primary, contentColor = Color.White
                     )
                 ) {
                     Icon(
@@ -202,8 +215,15 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                 .padding(10.dp)
                 .fillMaxSize()
         ) {
+
             OutlinedTextField(
                 value = oldText,
+                visualTransformation = VisualTransformation { text ->
+                    val parsedText = parseCodeAsAnnotatedString(
+                        parser, theme, language.value, text.text
+                    )
+                    TransformedText(parsedText, OffsetMapping.Identity)
+                },
                 onValueChange = viewModel::updateOldText,
                 label = {
                     Text(
@@ -251,6 +271,12 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = newText,
+                visualTransformation = VisualTransformation { text ->
+                    val parsedText = parseCodeAsAnnotatedString(
+                        parser, theme, language.value, text.text
+                    )
+                    TransformedText(parsedText, OffsetMapping.Identity)
+                },
                 onValueChange = viewModel::updateNewText,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -308,9 +334,17 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                     .background(Color.White, RoundedCornerShape(8.dp))
             ) {
                 when (selectedViewType) {
-                    DiffViewType.TWO_SIDE -> TwoSideCharDiffText(diffResult)
-                    DiffViewType.SEPARATE -> SeparateCharDiffText(diffResult)
-                    DiffViewType.UNIFIED -> UnifiedCharDiffText(diffResult)
+                    DiffViewType.TWO_SIDE -> TwoSideCharDiffText(
+                        language.value, parser, theme, diffResult
+                    )
+
+                    DiffViewType.SEPARATE -> SeparateCharDiffText(
+                        language.value, parser, theme, diffResult
+                    )
+
+                    DiffViewType.UNIFIED -> UnifiedCharDiffText(
+                        language.value, parser, theme, diffResult
+                    )
                 }
             }
 

@@ -11,23 +11,32 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.wakaztahir.codeeditor.highlight.model.CodeLang
+import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
+import com.wakaztahir.codeeditor.highlight.theme.CodeTheme
+import com.wakaztahir.codeeditor.highlight.utils.parseCodeAsAnnotatedString
 import dev.jahidhasanco.diffly.domain.model.DiffEntry
 import dev.jahidhasanco.diffly.domain.model.DiffType
 import dev.jahidhasanco.diffly.presentation.theme.added
 import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
-fun UnifiedCharDiffText(diffResult: List<DiffEntry>) {
+fun UnifiedCharDiffText(
+    language: CodeLang,
+    parser: PrettifyParser,
+    theme: CodeTheme,
+    diffResult: List<DiffEntry>
+) {
     var oldLineNumber = 1
     var newLineNumber = 1
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         item {
             Text(
@@ -53,9 +62,9 @@ fun UnifiedCharDiffText(diffResult: List<DiffEntry>) {
             }
 
             val color = when (entry.type) {
-                DiffType.ADDED -> added.copy(alpha = 0.3f)
-                DiffType.DELETED -> delete.copy(alpha = 0.3f)
-                DiffType.CHANGED -> delete.copy(alpha = 0.2f)
+                DiffType.ADDED -> added.copy(alpha = 0.05f)
+                DiffType.DELETED -> delete.copy(alpha = 0.05f)
+                DiffType.CHANGED -> delete.copy(alpha = 0.05f)
                 else -> Color.Transparent
             }
 
@@ -70,22 +79,20 @@ fun UnifiedCharDiffText(diffResult: List<DiffEntry>) {
                         verticalAlignment = Alignment.Top
                     ) {
                         // Old line number
-                        Text(
-                            text = entry.oldLine?.let { oldLineNumber.toString() } ?: "",
+                        Text(text = entry.oldLine?.let { oldLineNumber.toString() }
+                            ?: "",
                             modifier = Modifier
                                 .width(40.dp)
                                 .padding(end = 2.dp),
-                            color = Color.Gray
-                        )
+                            color = Color.Gray)
 
                         // New line number
-                        Text(
-                            text = entry.newLine?.let { newLineNumber.toString() } ?: "",
+                        Text(text = entry.newLine?.let { newLineNumber.toString() }
+                            ?: "",
                             modifier = Modifier
                                 .width(40.dp)
                                 .padding(end = 2.dp),
-                            color = Color.Gray
-                        )
+                            color = Color.Gray)
 
                         // Prefix
                         Text(
@@ -96,12 +103,21 @@ fun UnifiedCharDiffText(diffResult: List<DiffEntry>) {
 
                         // Line content or char-level diff
                         if (entry.type == DiffType.CHANGED && !entry.charDiffs.isNullOrEmpty()) {
-                            InlineCharDiffText(charDiffs = entry.charDiffs)
-                        } else {
-                            Text(
-                                text = it,
-                                color = Color.Black
+                            InlineCharDiffText(
+                                it,
+                                charDiffs = entry.charDiffs,
+                                language,
+                                parser,
+                                theme
                             )
+                        } else {
+                            val syntaxAnnotatedString =
+                                remember(it, language, theme) {
+                                    parseCodeAsAnnotatedString(
+                                        parser, theme, language, it
+                                    )
+                                }
+                            Text(syntaxAnnotatedString)
                         }
                     }
                 }

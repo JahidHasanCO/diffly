@@ -18,6 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.wakaztahir.codeeditor.highlight.model.CodeLang
+import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
+import com.wakaztahir.codeeditor.highlight.theme.CodeTheme
+import com.wakaztahir.codeeditor.highlight.utils.parseCodeAsAnnotatedString
 import dev.jahidhasanco.diffly.domain.model.CharDiffType
 import dev.jahidhasanco.diffly.domain.model.DiffEntry
 import dev.jahidhasanco.diffly.domain.model.DiffType
@@ -25,7 +29,12 @@ import dev.jahidhasanco.diffly.presentation.theme.added
 import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
-fun SeparateCharDiffText(diffResult: List<DiffEntry>) {
+fun SeparateCharDiffText(
+    language: CodeLang,
+    parser: PrettifyParser,
+    theme: CodeTheme,
+    diffResult: List<DiffEntry>
+) {
     Column(modifier = Modifier.fillMaxSize()) {
 
         // Original Text Column
@@ -61,7 +70,7 @@ fun SeparateCharDiffText(diffResult: List<DiffEntry>) {
                     }
                     val color = when (entry.type) {
                         DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> delete.copy(
-                            alpha = 0.3f
+                            alpha = 0.05f
                         )
 
                         else -> Color.Unspecified
@@ -74,9 +83,21 @@ fun SeparateCharDiffText(diffResult: List<DiffEntry>) {
                             .background(color)
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
-                            InlineCharDiffText(charDiffs = charDiffs)
+                            InlineCharDiffText(
+                                line,
+                                charDiffs = charDiffs,
+                                language,
+                                parser,
+                                theme
+                            )
                         } else {
-                            Text(line)
+                            val syntaxAnnotatedString =
+                                remember(line, language, theme) {
+                                    parseCodeAsAnnotatedString(
+                                        parser, theme, language, line
+                                    )
+                                }
+                            Text(syntaxAnnotatedString)
                         }
                     }
                 }
@@ -116,7 +137,7 @@ fun SeparateCharDiffText(diffResult: List<DiffEntry>) {
                     }
                     val color = when (entry.type) {
                         DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> added.copy(
-                            alpha = 0.3f
+                            alpha = 0.05f
                         )
 
                         else -> Color.Unspecified
@@ -129,9 +150,21 @@ fun SeparateCharDiffText(diffResult: List<DiffEntry>) {
                             .background(color)
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
-                            InlineCharDiffText(charDiffs = charDiffs)
+                            InlineCharDiffText(
+                                line,
+                                charDiffs = charDiffs,
+                                language,
+                                parser,
+                                theme
+                            )
                         } else {
-                            Text(line)
+                            val syntaxAnnotatedString =
+                                remember(line, language, theme) {
+                                    parseCodeAsAnnotatedString(
+                                        parser, theme, language, line
+                                    )
+                                }
+                            Text(syntaxAnnotatedString)
                         }
                     }
                 }

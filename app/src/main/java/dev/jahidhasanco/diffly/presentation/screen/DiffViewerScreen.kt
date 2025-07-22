@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
 import dev.jahidhasanco.diffly.presentation.component.SeparateCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
@@ -40,6 +41,9 @@ fun DiffViewerScreen(viewModel: DiffCheckerViewModel) {
     val selectedViewType by viewModel.selectedViewType.collectAsState()
     val diffResult by viewModel.diffResult.collectAsState()
     val expanded by viewModel.expanded.collectAsState()
+    val language = viewModel.selectedLanguage.collectAsState()
+    val parser = PrettifyParser()
+    val theme = viewModel.theme
 
     Scaffold(
         modifier = Modifier
@@ -50,94 +54,94 @@ fun DiffViewerScreen(viewModel: DiffCheckerViewModel) {
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(
-                        onClick = viewModel::goBack,
-                    ) {
+                IconButton(
+                    onClick = viewModel::goBack,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            }, title = {
+                Text(
+                    "Diff Viewer",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                )
+            }, actions = {
+                // Popup Menu Icon
+                Box {
+                    IconButton(onClick = { viewModel.setExpanded(!expanded) }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            Icons.Default.MoreVert,
+                            contentDescription = "Menu"
                         )
                     }
-                }, title = {
-                    Text(
-                        "Diff Viewer",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                    )
-                }, actions = {
-                    // Popup Menu Icon
-                    Box {
-                        IconButton(onClick = { viewModel.setExpanded(!expanded) }) {
-                            Icon(
-                                Icons.Default.MoreVert,
-                                contentDescription = "Menu"
-                            )
-                        }
 
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { viewModel.setExpanded(false) }) {
-                            DropdownMenuItem(
-                                text = { Text("Two Side View") },
-                                trailingIcon = when (selectedViewType) {
-                                    DiffViewType.TWO_SIDE -> {
-                                        {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { viewModel.setExpanded(false) }) {
+                        DropdownMenuItem(
+                            text = { Text("Two Side View") },
+                            trailingIcon = when (selectedViewType) {
+                                DiffViewType.TWO_SIDE -> {
+                                    {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null
+                                        )
                                     }
+                                }
 
-                                    else -> null
-                                },
-                                onClick = {
-                                    viewModel.selectViewType(
-                                        DiffViewType.TWO_SIDE
-                                    )
-                                })
-                            DropdownMenuItem(
-                                text = { Text("Separate View") },
-                                trailingIcon = when (selectedViewType) {
-                                    DiffViewType.SEPARATE -> {
-                                        {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
+                                else -> null
+                            },
+                            onClick = {
+                                viewModel.selectViewType(
+                                    DiffViewType.TWO_SIDE
+                                )
+                            })
+                        DropdownMenuItem(
+                            text = { Text("Separate View") },
+                            trailingIcon = when (selectedViewType) {
+                                DiffViewType.SEPARATE -> {
+                                    {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null
+                                        )
                                     }
+                                }
 
-                                    else -> null
-                                },
-                                onClick = {
-                                    viewModel.selectViewType(
-                                        DiffViewType.SEPARATE
-                                    )
-                                })
-                            DropdownMenuItem(
-                                text = { Text("Unified View") },
-                                trailingIcon = when (selectedViewType) {
-                                    DiffViewType.UNIFIED -> {
-                                        {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
+                                else -> null
+                            },
+                            onClick = {
+                                viewModel.selectViewType(
+                                    DiffViewType.SEPARATE
+                                )
+                            })
+                        DropdownMenuItem(
+                            text = { Text("Unified View") },
+                            trailingIcon = when (selectedViewType) {
+                                DiffViewType.UNIFIED -> {
+                                    {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null
+                                        )
                                     }
+                                }
 
-                                    else -> null
-                                },
-                                onClick = {
-                                    viewModel.selectViewType(
-                                        DiffViewType.UNIFIED
-                                    )
-                                })
-                        }
+                                else -> null
+                            },
+                            onClick = {
+                                viewModel.selectViewType(
+                                    DiffViewType.UNIFIED
+                                )
+                            })
                     }
-                },
+                }
+            },
 
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White,
@@ -153,9 +157,17 @@ fun DiffViewerScreen(viewModel: DiffCheckerViewModel) {
                 .background(Color.White, RoundedCornerShape(8.dp))
         ) {
             when (selectedViewType) {
-                DiffViewType.TWO_SIDE -> TwoSideCharDiffText(diffResult)
-                DiffViewType.SEPARATE -> SeparateCharDiffText(diffResult)
-                DiffViewType.UNIFIED -> UnifiedCharDiffText(diffResult)
+                DiffViewType.TWO_SIDE -> TwoSideCharDiffText(
+                    language.value, parser, theme, diffResult
+                )
+
+                DiffViewType.SEPARATE -> SeparateCharDiffText(
+                    language.value, parser, theme, diffResult
+                )
+
+                DiffViewType.UNIFIED -> UnifiedCharDiffText(
+                    language.value, parser, theme, diffResult
+                )
             }
         }
     }

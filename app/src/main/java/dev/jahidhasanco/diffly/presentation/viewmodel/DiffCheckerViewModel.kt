@@ -3,11 +3,13 @@ package dev.jahidhasanco.diffly.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wakaztahir.codeeditor.highlight.model.CodeLang
 import dev.jahidhasanco.diffly.di.AppModule
 import dev.jahidhasanco.diffly.domain.model.DiffEntry
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
 import dev.jahidhasanco.diffly.domain.usecase.CalculateDiffUseCase
 import dev.jahidhasanco.diffly.navigation.NavigationRouter
+import dev.jahidhasanco.diffly.presentation.theme.MonokaiDeepTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,8 +24,14 @@ class DiffCheckerViewModel(
     private val _diffResult = MutableStateFlow<List<DiffEntry>>(emptyList())
     val diffResult: StateFlow<List<DiffEntry>> = _diffResult
 
+    private val _selectedLanguage = MutableStateFlow(CodeLang.Basic)
+    val selectedLanguage: StateFlow<CodeLang> = _selectedLanguage
+
+    val theme = MonokaiDeepTheme()
+
     private val _oldText = MutableStateFlow("")
     val oldText: StateFlow<String> = _oldText
+
 
     private val _newText = MutableStateFlow("")
     val newText: StateFlow<String> = _newText
@@ -74,6 +82,10 @@ class DiffCheckerViewModel(
         if (_realTimeDiff.value) calculateDiff(_oldText.value, _newText.value)
     }
 
+
+    fun selectLanguage(language: CodeLang) {
+        _selectedLanguage.value = language
+    }
 
     fun calculateDiff(oldText: String, newText: String) {
         viewModelScope.launch {

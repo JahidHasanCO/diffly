@@ -10,6 +10,7 @@ materialIconsCore = "1.7.8"
 materialIconsExtended = "1.7.8"
 material = "1.8.3"
 navigation = "2.7.3"
+composeCodeEditor = "2.0.3"
 
 
 [libraries]
@@ -28,7 +29,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material = { group = "androidx.compose.material", name = "material", version.ref = "material" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
-
+compose-code-editor = { group = "com.github.qawaz", name = "compose-code-editor", version.ref = "composeCodeEditor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
