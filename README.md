@@ -17,12 +17,9 @@ This project is inspired by [Diffchecker Text Compare](https://www.diffchecker.c
 
 ## Screenshots
 
-| Screenshot 1                           | Screenshot 2                           | Screenshot 3                           |
-|----------------------------------------|----------------------------------------|----------------------------------------|
-| ![Screenshot 1](ART/ART1-portrait.png) | ![Screenshot 2](ART/ART2-portrait.png) | ![Screenshot 3](ART/ART3-portrait.png) |
-| Screenshot 4                           | Screenshot 5                           | Screenshot 6                           |
-| -----------------------                | ----------------------                 | ---------------------                  |
-| ![Screenshot 4](ART/ART4-portrait.png) | ![Screenshot 5](ART/ART5-portrait.png) | ![Screenshot 6](ART/ART6-portrait.png) |
+| Screenshot 1                           | Screenshot 2                           | Screenshot 3                           | Screenshot 4                           | Screenshot 5                           | Screenshot 6                           |
+|----------------------------------------|----------------------------------------|----------------------------------------|----------------------------------------|----------------------------------------|----------------------------------------|
+| ![Screenshot 1](ART/ART1-portrait.png) | ![Screenshot 2](ART/ART2-portrait.png) | ![Screenshot 3](ART/ART3-portrait.png) | ![Screenshot 4](ART/ART4-portrait.png) | ![Screenshot 5](ART/ART5-portrait.png) | ![Screenshot 6](ART/ART6-portrait.png) |
 
 ## Detect Algorithm
 
