@@ -1,0 +1,2 @@
+password: 12345df
+alaias: key0
