@@ -71,7 +71,7 @@ fun SeparateCharDiffText(
                     }
                     val color = when (entry.type) {
                         DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> delete.copy(
-                            alpha = 0.05f
+                            alpha = 0.1f
                         )
 
                         else -> Color.Unspecified
@@ -146,7 +146,7 @@ fun SeparateCharDiffText(
                     }
                     val color = when (entry.type) {
                         DiffType.ADDED, DiffType.DELETED, DiffType.CHANGED -> added.copy(
-                            alpha = 0.05f
+                            alpha = 0.1f
                         )
 
                         else -> Color.Unspecified

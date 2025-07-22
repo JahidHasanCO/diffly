@@ -69,9 +69,9 @@ fun TwoSideCharDiffText(
                     val color =
                         entry.type.takeIf { it != DiffType.UNCHANGED }?.let {
                             when (it) {
-                                DiffType.ADDED -> delete.copy(alpha = 0.05f)
-                                DiffType.DELETED -> delete.copy(alpha = 0.05f)
-                                DiffType.CHANGED -> delete.copy(alpha = 0.05f)
+                                DiffType.ADDED -> delete.copy(alpha = 0.1f)
+                                DiffType.DELETED -> delete.copy(alpha = 0.1f)
+                                DiffType.CHANGED -> delete.copy(alpha = 0.1f)
                                 else -> Color.Unspecified
                             }
                         } ?: Color.Unspecified
@@ -146,9 +146,9 @@ fun TwoSideCharDiffText(
                     val color =
                         entry.type.takeIf { it != DiffType.UNCHANGED }?.let {
                             when (it) {
-                                DiffType.ADDED -> added.copy(alpha = 0.05f)
-                                DiffType.DELETED -> added.copy(alpha = 0.05f)
-                                DiffType.CHANGED -> added.copy(alpha = 0.05f)
+                                DiffType.ADDED -> added.copy(alpha = 0.1f)
+                                DiffType.DELETED -> added.copy(alpha = 0.1f)
+                                DiffType.CHANGED -> added.copy(alpha = 0.1f)
                                 else -> Color.Unspecified
                             }
                         } ?: Color.Unspecified

@@ -46,8 +46,8 @@ fun InlineCharDiffText(
                     }
 
                 val backgroundColor = when (charDiffs.getOrNull(i)?.type) {
-                    CharDiffType.INSERTED -> added.copy(alpha = 0.2f)
-                    CharDiffType.DELETED -> delete.copy(alpha = 0.2f)
+                    CharDiffType.INSERTED -> added.copy(alpha = 0.3f)
+                    CharDiffType.DELETED -> delete.copy(alpha = 0.3f)
                     CharDiffType.UNCHANGED -> Color.Transparent
                     else -> Color.Transparent
                 }

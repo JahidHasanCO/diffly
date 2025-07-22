@@ -63,9 +63,9 @@ fun UnifiedCharDiffText(
             }
 
             val color = when (entry.type) {
-                DiffType.ADDED -> added.copy(alpha = 0.05f)
-                DiffType.DELETED -> delete.copy(alpha = 0.05f)
-                DiffType.CHANGED -> delete.copy(alpha = 0.05f)
+                DiffType.ADDED -> added.copy(alpha = 0.1f)
+                DiffType.DELETED -> delete.copy(alpha = 0.1f)
+                DiffType.CHANGED -> delete.copy(alpha = 0.1f)
                 else -> Color.Transparent
             }
 
