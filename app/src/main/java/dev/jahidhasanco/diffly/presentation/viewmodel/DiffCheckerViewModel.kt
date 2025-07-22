@@ -27,6 +27,10 @@ class DiffCheckerViewModel(
     private val _selectedLanguage = MutableStateFlow(CodeLang.Basic)
     val selectedLanguage: StateFlow<CodeLang> = _selectedLanguage
 
+    private val _isSyntaxHighlightEnabled = MutableStateFlow(true)
+    val isSyntaxHighlightEnabled: StateFlow<Boolean> = _isSyntaxHighlightEnabled
+
+
     val theme = MonokaiDeepTheme()
 
     private val _oldText = MutableStateFlow("")
@@ -85,6 +89,10 @@ class DiffCheckerViewModel(
 
     fun selectLanguage(language: CodeLang) {
         _selectedLanguage.value = language
+    }
+
+    fun setSyntaxHighlightEnabled(enabled: Boolean) {
+        _isSyntaxHighlightEnabled.value = enabled
     }
 
     fun calculateDiff(oldText: String, newText: String) {

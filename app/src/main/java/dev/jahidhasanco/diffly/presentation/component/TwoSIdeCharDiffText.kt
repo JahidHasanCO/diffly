@@ -30,6 +30,7 @@ import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
 fun TwoSideCharDiffText(
+    isSyntaxHighlightEnabled: Boolean,
     language: CodeLang,
     parser: PrettifyParser,
     theme: CodeTheme,
@@ -82,6 +83,7 @@ fun TwoSideCharDiffText(
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
                             InlineCharDiffText(
+                                isSyntaxHighlightEnabled,
                                 line,
                                 charDiffs = charDiffs,
                                 language,
@@ -89,16 +91,20 @@ fun TwoSideCharDiffText(
                                 theme
                             )
                         } else {
-                            val syntaxAnnotatedString =
-                                remember(line, language, theme) {
-                                    parseCodeAsAnnotatedString(
-                                        parser,
-                                        theme,
-                                        language,
-                                        line
-                                    )
-                                }
-                            Text(syntaxAnnotatedString)
+                            if (isSyntaxHighlightEnabled) {
+                                val syntaxAnnotatedString =
+                                    remember(line, language, theme) {
+                                        parseCodeAsAnnotatedString(
+                                            parser,
+                                            theme,
+                                            language,
+                                            line
+                                        )
+                                    }
+                                Text(syntaxAnnotatedString)
+                            } else {
+                                Text(line)
+                            }
                         }
                     }
                 }
@@ -155,6 +161,7 @@ fun TwoSideCharDiffText(
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
                             InlineCharDiffText(
+                                isSyntaxHighlightEnabled,
                                 line,
                                 charDiffs = charDiffs,
                                 language,
@@ -162,16 +169,20 @@ fun TwoSideCharDiffText(
                                 theme
                             )
                         } else {
-                            val syntaxAnnotatedString =
-                                remember(line, language, theme) {
-                                    parseCodeAsAnnotatedString(
-                                        parser,
-                                        theme,
-                                        language,
-                                        line
-                                    )
-                                }
-                            Text(syntaxAnnotatedString)
+                            if (isSyntaxHighlightEnabled) {
+                                val syntaxAnnotatedString =
+                                    remember(line, language, theme) {
+                                        parseCodeAsAnnotatedString(
+                                            parser,
+                                            theme,
+                                            language,
+                                            line
+                                        )
+                                    }
+                                Text(syntaxAnnotatedString)
+                            } else {
+                                Text(line)
+                            }
                         }
                     }
                 }

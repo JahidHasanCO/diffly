@@ -30,6 +30,7 @@ import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
 fun SeparateCharDiffText(
+    isSyntaxHighlightEnabled: Boolean,
     language: CodeLang,
     parser: PrettifyParser,
     theme: CodeTheme,
@@ -84,6 +85,7 @@ fun SeparateCharDiffText(
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
                             InlineCharDiffText(
+                                isSyntaxHighlightEnabled,
                                 line,
                                 charDiffs = charDiffs,
                                 language,
@@ -91,13 +93,20 @@ fun SeparateCharDiffText(
                                 theme
                             )
                         } else {
-                            val syntaxAnnotatedString =
-                                remember(line, language, theme) {
-                                    parseCodeAsAnnotatedString(
-                                        parser, theme, language, line
-                                    )
-                                }
-                            Text(syntaxAnnotatedString)
+                            if (isSyntaxHighlightEnabled) {
+                                val syntaxAnnotatedString =
+                                    remember(line, language, theme) {
+                                        parseCodeAsAnnotatedString(
+                                            parser,
+                                            theme,
+                                            language,
+                                            line
+                                        )
+                                    }
+                                Text(syntaxAnnotatedString)
+                            } else {
+                                Text(line)
+                            }
                         }
                     }
                 }
@@ -151,6 +160,7 @@ fun SeparateCharDiffText(
                     ) {
                         if (!charDiffs.isNullOrEmpty()) {
                             InlineCharDiffText(
+                                isSyntaxHighlightEnabled,
                                 line,
                                 charDiffs = charDiffs,
                                 language,
@@ -158,13 +168,20 @@ fun SeparateCharDiffText(
                                 theme
                             )
                         } else {
-                            val syntaxAnnotatedString =
-                                remember(line, language, theme) {
-                                    parseCodeAsAnnotatedString(
-                                        parser, theme, language, line
-                                    )
-                                }
-                            Text(syntaxAnnotatedString)
+                            if (isSyntaxHighlightEnabled) {
+                                val syntaxAnnotatedString =
+                                    remember(line, language, theme) {
+                                        parseCodeAsAnnotatedString(
+                                            parser,
+                                            theme,
+                                            language,
+                                            line
+                                        )
+                                    }
+                                Text(syntaxAnnotatedString)
+                            } else {
+                                Text(line)
+                            }
                         }
                     }
                 }

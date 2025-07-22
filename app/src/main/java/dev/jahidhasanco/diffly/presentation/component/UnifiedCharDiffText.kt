@@ -27,6 +27,7 @@ import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
 fun UnifiedCharDiffText(
+    isSyntaxHighlightEnabled: Boolean,
     language: CodeLang,
     parser: PrettifyParser,
     theme: CodeTheme,
@@ -104,6 +105,7 @@ fun UnifiedCharDiffText(
                         // Line content or char-level diff
                         if (entry.type == DiffType.CHANGED && !entry.charDiffs.isNullOrEmpty()) {
                             InlineCharDiffText(
+                                isSyntaxHighlightEnabled,
                                 it,
                                 charDiffs = entry.charDiffs,
                                 language,
@@ -111,13 +113,17 @@ fun UnifiedCharDiffText(
                                 theme
                             )
                         } else {
-                            val syntaxAnnotatedString =
-                                remember(it, language, theme) {
-                                    parseCodeAsAnnotatedString(
-                                        parser, theme, language, it
-                                    )
-                                }
-                            Text(syntaxAnnotatedString)
+                            if (isSyntaxHighlightEnabled) {
+                                val syntaxAnnotatedString =
+                                    remember(line, language, theme) {
+                                        parseCodeAsAnnotatedString(
+                                            parser, theme, language, line
+                                        )
+                                    }
+                                Text(syntaxAnnotatedString)
+                            } else {
+                                Text(line)
+                            }
                         }
                     }
                 }

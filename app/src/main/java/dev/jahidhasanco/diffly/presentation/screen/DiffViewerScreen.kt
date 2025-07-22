@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
+import dev.jahidhasanco.diffly.presentation.component.DiffViewMenu
+import dev.jahidhasanco.diffly.presentation.component.LanguageDropdown
 import dev.jahidhasanco.diffly.presentation.component.SeparateCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.UnifiedCharDiffText
@@ -40,10 +38,10 @@ import dev.jahidhasanco.diffly.presentation.viewmodel.DiffCheckerViewModel
 fun DiffViewerScreen(viewModel: DiffCheckerViewModel) {
     val selectedViewType by viewModel.selectedViewType.collectAsState()
     val diffResult by viewModel.diffResult.collectAsState()
-    val expanded by viewModel.expanded.collectAsState()
     val language = viewModel.selectedLanguage.collectAsState()
     val parser = PrettifyParser()
     val theme = viewModel.theme
+    val isSyntaxHighlightEnabled by viewModel.isSyntaxHighlightEnabled.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -70,77 +68,16 @@ fun DiffViewerScreen(viewModel: DiffCheckerViewModel) {
                     ),
                 )
             }, actions = {
-                // Popup Menu Icon
-                Box {
-                    IconButton(onClick = { viewModel.setExpanded(!expanded) }) {
-                        Icon(
-                            Icons.Default.MoreVert,
-                            contentDescription = "Menu"
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { viewModel.setExpanded(false) }) {
-                        DropdownMenuItem(
-                            text = { Text("Two Side View") },
-                            trailingIcon = when (selectedViewType) {
-                                DiffViewType.TWO_SIDE -> {
-                                    {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-
-                                else -> null
-                            },
-                            onClick = {
-                                viewModel.selectViewType(
-                                    DiffViewType.TWO_SIDE
-                                )
-                            })
-                        DropdownMenuItem(
-                            text = { Text("Separate View") },
-                            trailingIcon = when (selectedViewType) {
-                                DiffViewType.SEPARATE -> {
-                                    {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-
-                                else -> null
-                            },
-                            onClick = {
-                                viewModel.selectViewType(
-                                    DiffViewType.SEPARATE
-                                )
-                            })
-                        DropdownMenuItem(
-                            text = { Text("Unified View") },
-                            trailingIcon = when (selectedViewType) {
-                                DiffViewType.UNIFIED -> {
-                                    {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-
-                                else -> null
-                            },
-                            onClick = {
-                                viewModel.selectViewType(
-                                    DiffViewType.UNIFIED
-                                )
-                            })
-                    }
-                }
+                if (isSyntaxHighlightEnabled) LanguageDropdown(
+                    selectedLanguage = language.value,
+                    onLanguageSelected = viewModel::selectLanguage
+                )
+                DiffViewMenu(
+                    selectedViewType = selectedViewType,
+                    onViewTypeSelected = viewModel::selectViewType,
+                    isSyntaxHighlightEnabled = isSyntaxHighlightEnabled,
+                    onSyntaxHighlightToggle = viewModel::setSyntaxHighlightEnabled
+                )
             },
 
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -158,15 +95,27 @@ fun DiffViewerScreen(viewModel: DiffCheckerViewModel) {
         ) {
             when (selectedViewType) {
                 DiffViewType.TWO_SIDE -> TwoSideCharDiffText(
-                    language.value, parser, theme, diffResult
+                    isSyntaxHighlightEnabled,
+                    language.value,
+                    parser,
+                    theme,
+                    diffResult
                 )
 
                 DiffViewType.SEPARATE -> SeparateCharDiffText(
-                    language.value, parser, theme, diffResult
+                    isSyntaxHighlightEnabled,
+                    language.value,
+                    parser,
+                    theme,
+                    diffResult
                 )
 
                 DiffViewType.UNIFIED -> UnifiedCharDiffText(
-                    language.value, parser, theme, diffResult
+                    isSyntaxHighlightEnabled,
+                    language.value,
+                    parser,
+                    theme,
+                    diffResult
                 )
             }
         }

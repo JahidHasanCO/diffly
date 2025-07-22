@@ -18,56 +18,77 @@ import dev.jahidhasanco.diffly.presentation.theme.delete
 
 @Composable
 fun InlineCharDiffText(
+    isSyntaxHighlightEnabled: Boolean,
     code: String,
     charDiffs: List<CharDiff>,
     language: CodeLang,
     parser: PrettifyParser,
     theme: CodeTheme
 ) {
-    val syntaxAnnotatedString = remember(code, language, theme) {
-        parseCodeAsAnnotatedString(parser, theme, language, code)
-    }
+    if (isSyntaxHighlightEnabled) {
+        val syntaxAnnotatedString = remember(code, language, theme) {
+            parseCodeAsAnnotatedString(parser, theme, language, code)
+        }
 
-    val combinedAnnotatedString = buildAnnotatedString {
-        for (i in code.indices) {
-            val char = code[i]
+        val combinedAnnotatedString = buildAnnotatedString {
+            for (i in code.indices) {
+                val char = code[i]
 
 
-            // get all syntax span styles at index i
-            val spanStylesAtIndex =
-                syntaxAnnotatedString.spanStyles.filter { it.start <= i && i < it.end }
-                    .map { it.item }
+                // get all syntax span styles at index i
+                val spanStylesAtIndex =
+                    syntaxAnnotatedString.spanStyles.filter { it.start <= i && i < it.end }
+                        .map { it.item }
 
-            val charStyle = spanStylesAtIndex.fold(SpanStyle()) { acc, style ->
-                acc.merge(style)
-            }
+                val charStyle =
+                    spanStylesAtIndex.fold(SpanStyle()) { acc, style ->
+                        acc.merge(style)
+                    }
 
-            val backgroundColor = when (charDiffs.getOrNull(i)?.type) {
-                CharDiffType.INSERTED -> added.copy(alpha = 0.2f)
-                CharDiffType.DELETED -> delete.copy(alpha = 0.2f)
-                CharDiffType.UNCHANGED -> Color.Transparent
-                else -> Color.Transparent
-            }
+                val backgroundColor = when (charDiffs.getOrNull(i)?.type) {
+                    CharDiffType.INSERTED -> added.copy(alpha = 0.2f)
+                    CharDiffType.DELETED -> delete.copy(alpha = 0.2f)
+                    CharDiffType.UNCHANGED -> Color.Transparent
+                    else -> Color.Transparent
+                }
 
-            val finalColor = if (charStyle.color == Color.Unspecified) {
-                Color.Black
-            } else {
-                charStyle.color
-            }
+                val finalColor = if (charStyle.color == Color.Unspecified) {
+                    Color.Black
+                } else {
+                    charStyle.color
+                }
 
-            val mergedStyle = charStyle.merge(
-                SpanStyle(
-                    color = finalColor,
-                    background = backgroundColor
+                val mergedStyle = charStyle.merge(
+                    SpanStyle(
+                        color = finalColor,
+                        background = backgroundColor
+                    )
                 )
-            )
 
 
-            withStyle(mergedStyle) {
-                append(char)
+                withStyle(mergedStyle) {
+                    append(char)
+                }
             }
         }
-    }
 
-    Text(text = combinedAnnotatedString)
+        Text(text = combinedAnnotatedString)
+    } else {
+        val annotatedString = buildAnnotatedString {
+            charDiffs.forEach { cd ->
+
+                val backgroundColor = when (cd.type) {
+                    CharDiffType.UNCHANGED -> Color.Unspecified
+                    CharDiffType.INSERTED -> added
+                    CharDiffType.DELETED -> delete
+                }
+                withStyle(
+                    SpanStyle(background = backgroundColor)
+                ) {
+                    append(cd.char)
+                }
+            }
+        }
+        Text(annotatedString)
+    }
 }

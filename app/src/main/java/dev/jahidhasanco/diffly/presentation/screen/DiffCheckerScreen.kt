@@ -16,14 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +36,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -52,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.wakaztahir.codeeditor.highlight.prettify.PrettifyParser
 import com.wakaztahir.codeeditor.highlight.utils.parseCodeAsAnnotatedString
 import dev.jahidhasanco.diffly.domain.model.DiffViewType
+import dev.jahidhasanco.diffly.presentation.component.DiffViewMenu
 import dev.jahidhasanco.diffly.presentation.component.LanguageDropdown
 import dev.jahidhasanco.diffly.presentation.component.SeparateCharDiffText
 import dev.jahidhasanco.diffly.presentation.component.TwoSideCharDiffText
@@ -66,12 +64,12 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
     val oldText by viewModel.oldText.collectAsState()
     val newText by viewModel.newText.collectAsState()
     val realTimeDiff by viewModel.realTimeDiff.collectAsState()
-    val expanded by viewModel.expanded.collectAsState()
     val selectedViewType by viewModel.selectedViewType.collectAsState()
     val diffResult by viewModel.diffResult.collectAsState()
     val language = viewModel.selectedLanguage.collectAsState()
     val parser = PrettifyParser()
     val theme = viewModel.theme
+    val isSyntaxHighlightEnabled by viewModel.isSyntaxHighlightEnabled.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -91,10 +89,11 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                 }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White, titleContentColor = primary
                 ), actions = {
-                    LanguageDropdown(
-                        selectedLanguage = language.value,
-                        onLanguageSelected = viewModel::selectLanguage
-                    )
+                    if (isSyntaxHighlightEnabled)
+                        LanguageDropdown(
+                            selectedLanguage = language.value,
+                            onLanguageSelected = viewModel::selectLanguage
+                        )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
@@ -119,76 +118,12 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
                         )
                     }
 
-                    Box {
-                        IconButton(onClick = { viewModel.setExpanded(!expanded) }) {
-                            Icon(
-                                Icons.Default.MoreVert,
-                                contentDescription = "Menu"
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { viewModel.setExpanded(false) }) {
-                            DropdownMenuItem(
-                                text = { Text("Two Side View") },
-                                trailingIcon = when (selectedViewType) {
-                                    DiffViewType.TWO_SIDE -> {
-                                        {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-
-                                    else -> null
-                                },
-                                onClick = {
-                                    viewModel.selectViewType(
-                                        DiffViewType.TWO_SIDE
-                                    )
-                                })
-                            DropdownMenuItem(
-                                text = { Text("Separate View") },
-                                trailingIcon = when (selectedViewType) {
-                                    DiffViewType.SEPARATE -> {
-                                        {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-
-                                    else -> null
-                                },
-                                onClick = {
-                                    viewModel.selectViewType(
-                                        DiffViewType.SEPARATE
-                                    )
-                                })
-                            DropdownMenuItem(
-                                text = { Text("Unified View") },
-                                trailingIcon = when (selectedViewType) {
-                                    DiffViewType.UNIFIED -> {
-                                        {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-
-                                    else -> null
-                                },
-                                onClick = {
-                                    viewModel.selectViewType(
-                                        DiffViewType.UNIFIED
-                                    )
-                                })
-                        }
-                    }
+                    DiffViewMenu(
+                        selectedViewType = selectedViewType,
+                        onViewTypeSelected = viewModel::selectViewType,
+                        isSyntaxHighlightEnabled = isSyntaxHighlightEnabled,
+                        onSyntaxHighlightToggle = viewModel::setSyntaxHighlightEnabled
+                    )
                 })
         },
         floatingActionButton = {
@@ -218,12 +153,16 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
 
             OutlinedTextField(
                 value = oldText,
-                visualTransformation = VisualTransformation { text ->
-                    val parsedText = parseCodeAsAnnotatedString(
-                        parser, theme, language.value, text.text
-                    )
-                    TransformedText(parsedText, OffsetMapping.Identity)
-                },
+                visualTransformation = if (isSyntaxHighlightEnabled) remember(
+                    language.value
+                ) {
+                    VisualTransformation { text ->
+                        val parsedText = parseCodeAsAnnotatedString(
+                            parser, theme, language.value, text.text
+                        )
+                        TransformedText(parsedText, OffsetMapping.Identity)
+                    }
+                } else VisualTransformation.None,
                 onValueChange = viewModel::updateOldText,
                 label = {
                     Text(
@@ -271,12 +210,16 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = newText,
-                visualTransformation = VisualTransformation { text ->
-                    val parsedText = parseCodeAsAnnotatedString(
-                        parser, theme, language.value, text.text
-                    )
-                    TransformedText(parsedText, OffsetMapping.Identity)
-                },
+                visualTransformation = if (isSyntaxHighlightEnabled) remember(
+                    language.value
+                ) {
+                    VisualTransformation { text ->
+                        val parsedText = parseCodeAsAnnotatedString(
+                            parser, theme, language.value, text.text
+                        )
+                        TransformedText(parsedText, OffsetMapping.Identity)
+                    }
+                } else VisualTransformation.None,
                 onValueChange = viewModel::updateNewText,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -335,14 +278,17 @@ fun DiffCheckerScreen(viewModel: DiffCheckerViewModel) {
             ) {
                 when (selectedViewType) {
                     DiffViewType.TWO_SIDE -> TwoSideCharDiffText(
+                        isSyntaxHighlightEnabled,
                         language.value, parser, theme, diffResult
                     )
 
                     DiffViewType.SEPARATE -> SeparateCharDiffText(
+                        isSyntaxHighlightEnabled,
                         language.value, parser, theme, diffResult
                     )
 
                     DiffViewType.UNIFIED -> UnifiedCharDiffText(
+                        isSyntaxHighlightEnabled,
                         language.value, parser, theme, diffResult
                     )
                 }
