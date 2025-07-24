@@ -48,71 +48,182 @@ fun UnifiedCharDiffText(
         }
 
         items(diffResult) { entry ->
-            val prefix = when (entry.type) {
-                DiffType.ADDED -> "+"
-                DiffType.DELETED -> "-"
-                DiffType.UNCHANGED -> " "
-                DiffType.CHANGED -> "~"
-            }
-
-            val line = when (entry.type) {
-                DiffType.ADDED -> entry.newLine
-                DiffType.DELETED -> entry.oldLine
-                DiffType.UNCHANGED -> entry.oldLine
-                DiffType.CHANGED -> entry.newLine
-            }
-
-            val color = when (entry.type) {
-                DiffType.ADDED -> added.copy(alpha = 0.1f)
-                DiffType.DELETED -> delete.copy(alpha = 0.1f)
-                DiffType.CHANGED -> delete.copy(alpha = 0.1f)
-                else -> Color.Transparent
-            }
-
-            line?.let {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 2.dp, vertical = 1.dp)
-                        .background(color)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.Top
+            // For CHANGED entries, show both old and new lines
+            if (entry.type == DiffType.CHANGED) {
+                // Show old line first with deletion styling
+                entry.oldLine?.let { oldLine ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 2.dp, vertical = 1.dp)
+                            .background(delete.copy(alpha = 0.1f))
                     ) {
-                        // Old line number
-                        Text(text = entry.oldLine?.let { oldLineNumber.toString() }
-                            ?: "",
-                            modifier = Modifier
-                                .width(40.dp)
-                                .padding(end = 2.dp),
-                            color = Color.Gray)
-
-                        // New line number
-                        Text(text = entry.newLine?.let { newLineNumber.toString() }
-                            ?: "",
-                            modifier = Modifier
-                                .width(40.dp)
-                                .padding(end = 2.dp),
-                            color = Color.Gray)
-
-                        // Prefix
-                        Text(
-                            text = prefix,
-                            modifier = Modifier.padding(end = 4.dp),
-                            color = Color.Gray
-                        )
-
-                        // Line content or char-level diff
-                        if (entry.type == DiffType.CHANGED && !entry.charDiffs.isNullOrEmpty()) {
-                            InlineCharDiffText(
-                                isSyntaxHighlightEnabled,
-                                it,
-                                charDiffs = entry.charDiffs,
-                                language,
-                                parser,
-                                theme
+                        Row(
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Old line number
+                            Text(
+                                text = oldLineNumber.toString(),
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .padding(end = 2.dp),
+                                color = Color.Gray
                             )
-                        } else {
+
+                            // New line number (empty for old line)
+                            Text(
+                                text = "",
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .padding(end = 2.dp),
+                                color = Color.Gray
+                            )
+
+                            // Prefix for deletion
+                            Text(
+                                text = "-",
+                                modifier = Modifier.padding(end = 4.dp),
+                                color = Color.Gray
+                            )
+
+                            // Old line content with syntax highlighting
+                            if (isSyntaxHighlightEnabled) {
+                                val syntaxAnnotatedString =
+                                    remember(oldLine, language, theme) {
+                                        parseCodeAsAnnotatedString(
+                                            parser, theme, language, oldLine
+                                        )
+                                    }
+                                Text(syntaxAnnotatedString)
+                            } else {
+                                Text(oldLine)
+                            }
+                        }
+                    }
+                }
+
+                // Show new line second with addition styling
+                entry.newLine?.let { newLine ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 2.dp, vertical = 1.dp)
+                            .background(added.copy(alpha = 0.1f))
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Old line number (empty for new line)
+                            Text(
+                                text = "",
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .padding(end = 2.dp),
+                                color = Color.Gray
+                            )
+
+                            // New line number
+                            Text(
+                                text = newLineNumber.toString(),
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .padding(end = 2.dp),
+                                color = Color.Gray
+                            )
+
+                            // Prefix for addition
+                            Text(
+                                text = "+",
+                                modifier = Modifier.padding(end = 4.dp),
+                                color = Color.Gray
+                            )
+
+                            // New line content with char-level diff or syntax highlighting
+                            if (!entry.charDiffs.isNullOrEmpty()) {
+                                InlineCharDiffText(
+                                    isSyntaxHighlightEnabled,
+                                    newLine,
+                                    charDiffs = entry.charDiffs,
+                                    language,
+                                    parser,
+                                    theme
+                                )
+                            } else {
+                                if (isSyntaxHighlightEnabled) {
+                                    val syntaxAnnotatedString =
+                                        remember(newLine, language, theme) {
+                                            parseCodeAsAnnotatedString(
+                                                parser, theme, language, newLine
+                                            )
+                                        }
+                                    Text(syntaxAnnotatedString)
+                                } else {
+                                    Text(newLine)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Update line numbers for CHANGED
+                oldLineNumber++
+                newLineNumber++
+            } else {
+                // Handle other diff types as before
+                val prefix = when (entry.type) {
+                    DiffType.ADDED -> "+"
+                    DiffType.DELETED -> "-"
+                    DiffType.UNCHANGED -> " "
+                    else -> " " // This shouldn't happen now
+                }
+
+                val line = when (entry.type) {
+                    DiffType.ADDED -> entry.newLine
+                    DiffType.DELETED -> entry.oldLine
+                    DiffType.UNCHANGED -> entry.oldLine
+                    else -> null // This shouldn't happen now
+                }
+
+                val color = when (entry.type) {
+                    DiffType.ADDED -> added.copy(alpha = 0.1f)
+                    DiffType.DELETED -> delete.copy(alpha = 0.1f)
+                    else -> Color.Transparent
+                }
+
+                line?.let {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 2.dp, vertical = 1.dp)
+                            .background(color)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Old line number
+                            Text(text = entry.oldLine?.let { oldLineNumber.toString() }
+                                ?: "",
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .padding(end = 2.dp),
+                                color = Color.Gray)
+
+                            // New line number
+                            Text(text = entry.newLine?.let { newLineNumber.toString() }
+                                ?: "",
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .padding(end = 2.dp),
+                                color = Color.Gray)
+
+                            // Prefix
+                            Text(
+                                text = prefix,
+                                modifier = Modifier.padding(end = 4.dp),
+                                color = Color.Gray
+                            )
+
+                            // Line content with syntax highlighting
                             if (isSyntaxHighlightEnabled) {
                                 val syntaxAnnotatedString =
                                     remember(line, language, theme) {
@@ -127,14 +238,16 @@ fun UnifiedCharDiffText(
                         }
                     }
                 }
-            }
 
-            when (entry.type) {
-                DiffType.ADDED -> newLineNumber++
-                DiffType.DELETED -> oldLineNumber++
-                DiffType.UNCHANGED, DiffType.CHANGED -> {
-                    oldLineNumber++
-                    newLineNumber++
+                // Update line numbers for other types
+                when (entry.type) {
+                    DiffType.ADDED -> newLineNumber++
+                    DiffType.DELETED -> oldLineNumber++
+                    DiffType.UNCHANGED -> {
+                        oldLineNumber++
+                        newLineNumber++
+                    }
+                    else -> {} // CHANGED is handled above
                 }
             }
         }
