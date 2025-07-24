@@ -2,6 +2,9 @@
 # It scans on push, PR, scheduled cron, or manual trigger.
 
 name: Scan with Detekt
+permissions:
+  contents: read
+  security-events: write
 
 on:
   push:
